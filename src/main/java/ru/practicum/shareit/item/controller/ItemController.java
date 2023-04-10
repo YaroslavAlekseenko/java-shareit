@@ -19,7 +19,7 @@ public class ItemController {
     private final ItemService itemService;
     private final String userIdHeader = "X-Sharer-User-Id";
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<ItemDto> createItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader(userIdHeader) Long userId) {
         ItemDto itemCreated = itemService.createItem(itemDto, userId);
         return ResponseEntity.status(201).body(itemCreated);
@@ -49,7 +49,7 @@ public class ItemController {
         return ResponseEntity.ok().body(item);
     }
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<ItemDto>> findAll(@RequestHeader(userIdHeader) Long userId) {
         List<ItemDto> items = itemService.getAllItemsByUserId(userId);
         return ResponseEntity.ok().body(items);

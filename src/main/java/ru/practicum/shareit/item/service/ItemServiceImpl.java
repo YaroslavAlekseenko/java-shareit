@@ -11,10 +11,7 @@ import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,7 +63,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> searchItemsByDescription(String text) {
         if (text.isBlank()) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
         return itemStorage.getAllItems()
                 .stream()
