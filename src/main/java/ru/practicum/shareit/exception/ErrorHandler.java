@@ -14,7 +14,7 @@ import java.util.Objects;
 public class ErrorHandler {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler({MethodArgumentNotValidException.class, ObjectNotAvailableException.class,
+    @ExceptionHandler({MethodArgumentNotValidException.class, UserOrItemNotAvailableException.class,
             InvalidDataException.class, IllegalArgumentException.class})
     public ErrorResponse handleNotValidArgumentException(Exception e) {
         log.warn(e.getClass().getSimpleName(), e);
@@ -36,7 +36,7 @@ public class ErrorHandler {
     }
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler({ObjectNotFoundException.class, AccessException.class})
+    @ExceptionHandler({UserOrItemNotFoundException.class, AccessException.class})
     public ErrorResponse handleDataExistExceptionException(RuntimeException e) {
         log.warn(e.getClass().getSimpleName(), e);
         return new ErrorResponse(404, "Not Found", e.getMessage());

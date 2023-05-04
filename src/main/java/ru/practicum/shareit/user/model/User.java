@@ -1,29 +1,14 @@
 package ru.practicum.shareit.user.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
-/**
- * Класс User:
- * id — уникальный идентификатор пользователя;
- * name — имя или логин пользователя;
- * email — адрес электронной почты (два пользователя не могут иметь одинаковый адрес электронной почты).
- */
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {

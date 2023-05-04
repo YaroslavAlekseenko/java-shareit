@@ -2,23 +2,22 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
-import ru.practicum.shareit.booking.model.*;
+import ru.practicum.shareit.booking.model.AccessLevel;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.State;
+import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.AccessException;
 import ru.practicum.shareit.exception.InvalidDataException;
-import ru.practicum.shareit.exception.ObjectNotAvailableException;
-import ru.practicum.shareit.exception.ObjectNotFoundException;
+import ru.practicum.shareit.exception.UserOrItemNotAvailableException;
+import ru.practicum.shareit.exception.UserOrItemNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.logger.Logger;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -33,30 +32,18 @@ public class BookingServiceImpl implements BookingService {
     private final UserService userService;
     private final BookingMapper bookingMapper;
     private final BookingRepository bookingRepository;
-    private final String host = "localhost";
-    private final String port = "8080";
-    private final String protocol = "http";
 
-    @Transactional
     @Override
     public BookingDto addBooking(long bookerId, BookingInputDto bookingInputDto) {
         Booking booking = bookingMapper.convertFromDto(bookingInputDto);
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(protocol)
-                .host(host)
-                .port(port)
-                .path("/bookings")
-                .build();
-        Logger.logInfo(HttpMethod.POST, uriComponents.toUriString(), booking.toString());
         User booker = userService.getUserById(bookerId);
         Item item = itemRepository.findById(booking.getItem().getId()).orElseThrow(() ->
-                new ObjectNotFoundException(String.format("Вещь с id %s не найдена", booking.getItem().getId())));
+                new UserOrItemNotFoundException(String.format("Вещь с id %s не найдена", booking.getItem().getId())));
         validateAddBooking(bookerId, booking, item);
         booking.setBooker(booker);
         booking.setStatus(Status.WAITING);
         booking.setItem(item);
         Booking bookingSaved = bookingRepository.save(booking);
-        Logger.logSave(HttpMethod.POST, uriComponents.toUriString(), bookingSaved.toString());
         return bookingMapper.convertToDto(bookingSaved);
     }
 
@@ -75,14 +62,6 @@ public class BookingServiceImpl implements BookingService {
             booking.setStatus(Status.REJECTED);
         }
         Booking bookingSaved = bookingRepository.save(booking);
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(protocol)
-                .host(host)
-                .port(port)
-                .path("/bookings/")
-                .query("approved={approved}")
-                .build();
-        Logger.logSave(HttpMethod.PATCH, uriComponents.toUriString(), bookingSaved.toString());
         return bookingMapper.convertToDto(bookingSaved);
     }
 
@@ -91,18 +70,11 @@ public class BookingServiceImpl implements BookingService {
     public Booking getBookingById(long bookingId, long userId, AccessLevel accessLevel) {
         User user = userService.getUserById(userId);
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(
-                () -> new ObjectNotFoundException(String.format("Бронирование с id %d не найдено", bookingId)));
+                () -> new UserOrItemNotFoundException(String.format("Бронирование с id %d не найдено", bookingId)));
         if (isUnableToAccess(user.getId(), booking, accessLevel)) {
             throw new AccessException(String.format("У пользователя с id %d нет прав на просмотр бронирования с id %d,",
                     userId, bookingId));
         }
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(protocol)
-                .host(host)
-                .port(port)
-                .path("/bookings/{bookingId}")
-                .build();
-        Logger.logSave(HttpMethod.GET, uriComponents.toUriString(), booking.toString());
         return booking;
     }
 
@@ -111,18 +83,11 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto getBooking(long bookingId, long userId, AccessLevel accessLevel) {
         User user = userService.getUserById(userId);
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(
-                () -> new ObjectNotFoundException(String.format("Бронирование с id %d не найдено", bookingId)));
+                () -> new UserOrItemNotFoundException(String.format("Бронирование с id %d не найдено", bookingId)));
         if (isUnableToAccess(user.getId(), booking, accessLevel)) {
             throw new AccessException(String.format("У пользователя с id %d нет прав на просмотр бронирования с id %d,",
                     userId, bookingId));
         }
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(protocol)
-                .host(host)
-                .port(port)
-                .path("/bookings/{bookingId}")
-                .build();
-        Logger.logSave(HttpMethod.GET, uriComponents.toUriString(), booking.toString());
         return bookingMapper.convertToDto(booking);
     }
 
@@ -156,14 +121,6 @@ public class BookingServiceImpl implements BookingService {
             default:
                 bookings = bookingRepository.findAllByBookerId(booker.getId(), sort);
         }
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(protocol)
-                .host(host)
-                .port(port)
-                .path("/bookings/")
-                .query("state={state}")
-                .build();
-        Logger.logSave(HttpMethod.GET, uriComponents.toUriString(), bookings.toString());
         return bookings
                 .stream()
                 .map(bookingMapper::convertToDto)
@@ -200,14 +157,6 @@ public class BookingServiceImpl implements BookingService {
             default:
                 bookings = bookingRepository.findAllByOwnerId(owner.getId(), sort);
         }
-        UriComponents uriComponents = UriComponentsBuilder.newInstance()
-                .scheme(protocol)
-                .host(host)
-                .port(port)
-                .path("/bookings/owner")
-                .query("state={state}")
-                .build();
-        Logger.logSave(HttpMethod.GET, uriComponents.toUriString(), bookings.toString());
         return bookings.stream()
                 .map(bookingMapper::convertToDto)
                 .collect(Collectors.toList());
@@ -238,7 +187,7 @@ public class BookingServiceImpl implements BookingService {
         if (bookerId == item.getUserId()) {
             throw new AccessException("Владелец вещи не может бронировать свои вещи.");
         } else if (!item.getAvailable()) {
-            throw new ObjectNotAvailableException(String.format("Вещь с id %d не доступна для бронирования.",
+            throw new UserOrItemNotAvailableException(String.format("Вещь с id %d не доступна для бронирования.",
                     item.getId()));
         } else if (isNotValidDate(booking.getStart(), booking.getEnd())) {
             throw new InvalidDataException("Даты бронирования выбраны некорректно.");
