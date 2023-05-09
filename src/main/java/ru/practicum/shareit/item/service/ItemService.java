@@ -1,67 +1,63 @@
 package ru.practicum.shareit.item.service;
 
-import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.CommentDtoResponse;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoResponse;
-import ru.practicum.shareit.item.dto.ItemDtoUpdate;
-import ru.practicum.shareit.item.dto.ItemListDto;
+
+import java.util.List;
 
 public interface ItemService {
     /**
-     * Добавление Вещи
-     *
-     * @param userId  идентификатор Пользователя владельца
+     * Реализует добавление Вещи в хранилище
+     * @param userId идентификатор Пользователя владельца
      * @param itemDto Вещь
-     * @return объект ItemDtoResponse
+     * @return объект ItemDto
      */
-    ItemDtoResponse createItem(ItemDto itemDto, Long userId);
+    ItemDto addItem(long userId, ItemDto itemDto);
 
     /**
-     * Обновление полей хранимой Вещи
-     *
-     * @param userId  идентификатор Пользователя владельца
-     * @param itemId  идентификатор Вещи
+     * Реализует обновление полей хранимой Вещи
+     * @param userId идентификатор Пользователя владельца
+     * @param itemId идентификатор Вещи
      * @param itemDto Вещь
-     * @return объект ItemDtoResponse
+     * @return объект ItemDto
      */
-    ItemDtoResponse updateItem(Long itemId, Long userId, ItemDtoUpdate itemDto);
+    ItemDto updateItem(long userId, long itemId, ItemDto itemDto);
 
     /**
-     * Возвращает ItemDtoResponse Вещи Пользователя
-     *
+     * Возвращает ItemDto Вещи Пользователя
      * @param itemId идентификатор Вещи
      * @param userId идентификатор Пользователя владельца Вещи
-     * @return ItemDtoResponse
+     * @return ItemDto
      */
-    ItemDtoResponse getItemByItemId(Long userId, Long itemId);
+    ItemDto getItemById(long itemId, long userId);
 
     /**
-     * Возвращает коллекцию Вещей Пользователя
-     *
-     * @param pageable пагинация
-     * @param userId   идентификатор Пользователя владельца Вещи
-     * @return ItemListDto
+     * Возвращает коллекцию DTO Вещей Пользователя
+     * @param userId идентификатор Пользователя владельца Вещи
+     * @return коллекцию ItemDto
      */
-    ItemListDto getPersonalItems(Pageable pageable, Long userId);
+    List<ItemDto> getAllItems(long userId);
 
     /**
-     * Поиск Вещей Пользователя
-     *
-     * @param pageable пагинация
-     * @param text     ключевое слово для поиска
-     * @return ItemListDto
+     * Реализует поиск Вещей в хранилище по ключевому слову
+     * @param text ключевое слово для поиска
+     * @return коллекцию ItemDto
      */
-    ItemListDto getFoundItems(Pageable pageable, String text);
+    List<ItemDto> searchItems(String text);
 
     /**
-     * Добавление Комментария
-     *
-     * @param userId     идентификатор Пользователя владельца Вещи
-     * @param itemId     идентификатор Вещи
+     * Реализует удаление Вещи из хранилища
+     * @param userId идентификатор Пользователя владельца Вещи
+     * @param itemId идентификатор удаляемой вещи
+     */
+    void removeItem(long userId, long itemId);
+
+    /**
+     * Реализует добавления Комментария
+     * @param userId идентификатор Пользователя владельца Вещи
+     * @param itemId идентификатор Вещи
      * @param commentDto Комментарий
-     * @return CommentDtoResponse
+     * @return CommentDto
      */
-    CommentDtoResponse addComment(Long itemId, Long userId, CommentDto commentDto);
+    CommentDto addComment(long userId, long itemId, CommentDto commentDto);
 }

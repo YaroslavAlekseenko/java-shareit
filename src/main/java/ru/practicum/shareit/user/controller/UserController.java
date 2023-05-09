@@ -1,52 +1,87 @@
 package ru.practicum.shareit.user.controller;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.service.UserService;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+import ru.practicum.shareit.exception.DataExistException;
+import ru.practicum.shareit.logger.Logger;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserDtoResponse;
-import ru.practicum.shareit.user.dto.UserDtoUpdate;
-import ru.practicum.shareit.user.dto.UserListDto;
+import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
-
+import java.util.List;
 
 @RestController
-@RequestMapping("/users")
-@Validated
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequestMapping(path = "/users")
+@AllArgsConstructor
 public class UserController {
+    private final String host = "localhost";
+    private final String port = "8080";
+    private final String protocol = "http";
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserDtoResponse> createUser(@Valid @RequestBody UserDto userDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userDto));
+    public ResponseEntity<UserDto> addUser(@Valid @RequestBody UserDto userDto) throws DataExistException {
+        UriComponents uriComponents = UriComponentsBuilder.newInstance()
+                .scheme(protocol)
+                .host(host)
+                .port(port)
+                .path("/users")
+                .build();
+        Logger.logRequest(HttpMethod.POST, uriComponents.toUriString(), userDto.toString());
+        return ResponseEntity.status(201).body(userService.addUser(userDto));
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<UserDtoResponse> getUserById(@PathVariable("id") @Min(1) Long userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.getUserById(userId));
+    @GetMapping("{userId}")
+    public ResponseEntity<UserDto> getUserById(@PathVariable long userId) {
+        UriComponents uriComponents = UriComponentsBuilder.newInstance()
+                .scheme(protocol)
+                .host(host)
+                .port(port)
+                .path("/users/{userId}")
+                .build();
+        Logger.logRequest(HttpMethod.GET, uriComponents.toUriString(), "пусто");
+        return ResponseEntity.ok().body(userService.getUser(userId));
     }
 
     @GetMapping
-    public ResponseEntity<UserListDto> getUsers() {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.getUsers());
+    public ResponseEntity<List<UserDto>> getAllUsers() throws DataExistException {
+        UriComponents uriComponents = UriComponentsBuilder.newInstance()
+                .scheme(protocol)
+                .host(host)
+                .port(port)
+                .path("/users")
+                .build();
+        Logger.logRequest(HttpMethod.GET, uriComponents.toUriString(), "пусто");
+        return ResponseEntity.ok().body(userService.getAllUsers());
     }
 
-    @PatchMapping("{id}")
-    public ResponseEntity<UserDtoResponse> updateUser(@RequestBody UserDtoUpdate userDtoUpdate,
-                                                      @PathVariable("id") Long userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(userDtoUpdate, userId));
+    @PatchMapping("{userId}")
+    public ResponseEntity<UserDto> updateUser(@PathVariable long userId, @RequestBody UserDto userDto) throws DataExistException {
+        UriComponents uriComponents = UriComponentsBuilder.newInstance()
+                .scheme(protocol)
+                .host(host)
+                .port(port)
+                .path("/users/{userId}")
+                .build();
+        Logger.logRequest(HttpMethod.PATCH, uriComponents.toUriString(), userDto.toString());
+        return ResponseEntity.ok().body(userService.updateUser(userId, userDto));
     }
 
-    @DeleteMapping("{id}")
-    public void deleteUser(@Min(1) @PathVariable("id") Long userId) {
-        userService.deleteUser(userId);
+    @DeleteMapping("{userId}")
+    public ResponseEntity<Void> removeUser(@PathVariable long userId) {
+        UriComponents uriComponents = UriComponentsBuilder.newInstance()
+                .scheme(protocol)
+                .host(host)
+                .port(port)
+                .path("/users/{userId}")
+                .build();
+        Logger.logRequest(HttpMethod.DELETE, uriComponents.toUriString(), "пусто");
+        userService.removeUser(userId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
-
 }

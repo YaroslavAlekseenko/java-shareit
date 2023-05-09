@@ -1,56 +1,63 @@
 package ru.practicum.shareit.booking.service;
 
-import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingDtoResponse;
-import ru.practicum.shareit.booking.dto.BookingListDto;
+import ru.practicum.shareit.booking.dto.BookingInputDto;
+import ru.practicum.shareit.booking.model.AccessLevel;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.State;
+
+import java.util.List;
 
 public interface BookingService {
     /**
-     * Бронирование
-     *
-     * @param bookerId   идентификатор
-     * @param bookingDto Бронь
-     * @return BookingDtoResponse
+     * Реализует бронирование
+     * @param bookerId идентификатор
+     * @param bookingInputDto Бронь
+     * @return BookingDto
      */
-    BookingDtoResponse createBooking(Long bookerId, BookingDto bookingDto);
+    BookingDto addBooking(long bookerId, BookingInputDto bookingInputDto);
 
     /**
-     * Подтверждение запроса на бронирование
-     *
-     * @param ownerId   идентификатор Владельца
+     * Реализует подтверждение или отклонение запроса на бронирование
+     * @param ownerId идентификатор Владельца
      * @param bookingId идентификатор Брони
-     * @param approved  статус бронирования
-     * @return BookingDtoResponse
+     * @param approved статус бронирования
+     * @param accessLevel уровень доступа
+     * @return BookingDto
      */
-    BookingDtoResponse approveBooking(Long ownerId, Long bookingId, String approved);
+    BookingDto approveOrRejectBooking(long ownerId, long bookingId, boolean approved, AccessLevel accessLevel);
 
     /**
      * Возвращает Бронирование по идентификатору
-     *
      * @param bookingId идентификатор Брони
-     * @param userId    идентификатор пользователя
-     * @return BookingDtoResponse
+     * @param userId идентификатор пользователя
+     * @param accessLevel уровень доступа
+     * @return Booking
      */
-    BookingDtoResponse getBookingByIdForOwnerAndBooker(Long bookingId, Long userId);
+    Booking getBookingById(long bookingId, long userId, AccessLevel accessLevel);
+
+    /**
+     * Возвращает Бронирование по идентификатору
+     * @param bookingId идентификатор Брони
+     * @param userId идентификатор пользователя
+     * @param accessLevel уровень доступа
+     * @return BookingDto
+     */
+    BookingDto getBooking(long bookingId, long userId, AccessLevel accessLevel);
 
     /**
      * Возвращает коллекцию Booking для текущего Пользователя
-     *
-     * @param pageable пагинация
-     * @param userId   идентификатор Пользователя
-     * @param state    состояние
-     * @return коллекцию BookingListDto
+     * @param state состояние
+     * @param bookerId идентификатор
+     * @return коллекцию BookingDto
      */
-    BookingListDto getAllBookingsForUser(Pageable pageable, Long userId, String state);
+    List<BookingDto> getBookingsOfCurrentUser(State state, long bookerId);
 
     /**
-     * Возвращает коллекцию Booking для Вещей текущего Пользователя
-     *
-     * @param pageable пагинация
-     * @param userId   идентификатор Пользователя
-     * @param state    состояние
-     * @return коллекцию BookingListDto
+     * Возвращает коллекцию Booking для текущего Владельца
+     * @param state состояние
+     * @param ownerId идентификатор Владельца
+     * @return коллекцию BookingDto
      */
-    BookingListDto getAllBookingsForItemsUser(Pageable pageable, Long userId, String state);
+    List<BookingDto> getBookingsOfOwner(State state, long ownerId);
 }

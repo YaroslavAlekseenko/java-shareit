@@ -1,61 +1,76 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.util.StringUtils;
+import ru.practicum.shareit.exception.DataExistException;
+import ru.practicum.shareit.exception.UserOrItemNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserDtoResponse;
-import ru.practicum.shareit.user.dto.UserDtoUpdate;
-import ru.practicum.shareit.user.dto.UserListDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.hibernate.cfg.AvailableSettings.USER;
+
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserRepository users;
-
-    private final UserMapper mapper;
+    private final UserMapper userMapper;
+    private final UserRepository userRepository;
 
     @Override
-    public UserDtoResponse createUser(UserDto user) {
-        return mapper.mapToUserDtoResponse(users.save(mapper.mapToUserFromUserDto(user)));
+    public UserDto addUser(UserDto userDto) {
+        User user = userMapper.convertFromDto(userDto);
+            User userSaved = userRepository.save(user);
+            return userMapper.convertToDto(userSaved);
+    }
+
+    @Transactional
+    @Override
+    public  UserDto updateUser(long id, UserDto userDto) {
+        User user = userMapper.convertFromDto(userDto);
+            User targetUser = userRepository.findById(id).orElseThrow(() -> new DataExistException(USER, id));
+            if (StringUtils.hasLength(user.getEmail())) {
+                targetUser.setEmail(user.getEmail());
+            }
+            if (StringUtils.hasLength(user.getName())) {
+                targetUser.setName(user.getName());
+            }
+            User userSaved = userRepository.save(targetUser);
+            return userMapper.convertToDto(userSaved);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public User getUserById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                new UserOrItemNotFoundException(String.format("Пользователь с id %s не найден", userId)));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public UserDto getUser(long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new UserOrItemNotFoundException(String.format("Пользователь с id %s не найден", userId)));
+        return userMapper.convertToDto(user);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<UserDto> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users
+                .stream()
+                .map(userMapper::convertToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public UserDtoResponse getUserById(Long id) {
-        return mapper.mapToUserDtoResponse(users.findById(id).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Пользователя с id=%s нет", id)))
-        );
-    }
-
-    @Override
-    public UserListDto getUsers() {
-        return UserListDto.builder()
-                .users(users.findAll().stream().map(mapper::mapToUserDtoResponse).collect(Collectors.toList()))
-                .build();
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public UserDtoResponse updateUser(UserDtoUpdate user, Long userId) {
-        User updatingUser = users.findById(userId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Пользователя с id=%s нет", userId)));
-        return mapper.mapToUserDtoResponse(users.save(mapper.mapToUserFromUserDtoUpdate(user, updatingUser)));
-    }
-
-    @Override
-    public void deleteUser(Long id) {
-        if (!users.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Пользователя с id=%s нет", id));
-        }
-        users.deleteById(id);
+    public void removeUser(long id) {
+        userRepository.deleteById(id);
     }
 }

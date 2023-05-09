@@ -1,47 +1,51 @@
 package ru.practicum.shareit.user.service;
 
+import ru.practicum.shareit.exception.DataExistException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserDtoResponse;
-import ru.practicum.shareit.user.dto.UserDtoUpdate;
-import ru.practicum.shareit.user.dto.UserListDto;
+import ru.practicum.shareit.user.model.User;
+
+import java.util.List;
 
 public interface UserService {
+
     /**
-     * Добавление Пользователя
-     *
+     * Реализует добавление Пользователя в хранилище
      * @param userDto объект Пользователь
-     * @return UserDtoResponse
+     * @return UserDto
      */
-    UserDtoResponse createUser(UserDto userDto);
+    UserDto addUser(UserDto userDto) throws DataExistException;
+
+    /**
+     * Реализует обновление полей Пользователя
+     * @param userId идентификатор Пользователя
+     * @param userDto объект Пользователь с изменениями
+     * @return UserDto
+     */
+    UserDto updateUser(long userId, UserDto userDto) throws DataExistException;
 
     /**
      * Возвращает Пользователя по идентификатору
-     *
      * @param userId идентификатор пользователя
-     * @return UserDtoResponse
+     * @return User
      */
-    UserDtoResponse getUserById(Long userId);
+    User getUserById(long userId);
+
+    /**
+     * Возвращает Пользователя по идентификатору
+     * @param userId идентификатор пользователя
+     * @return UserDto
+     */
+    UserDto getUser(long userId);
 
     /**
      * Возвращает коллекцию Пользователей
-     *
-     * @return коллекцию UserListDto
+     * @return коллекцию UserDto
      */
-    UserListDto getUsers();
+    List<UserDto> getAllUsers() throws DataExistException;
 
     /**
-     * Обновление полей Пользователя
-     *
-     * @param userId  идентификатор Пользователя
-     * @param userDto объект Пользователь с изменениями
-     * @return UserDtoResponse
-     */
-    UserDtoResponse updateUser(UserDtoUpdate userDto, Long userId);
-
-    /**
-     * Удаление Пользователя
-     *
+     * Реализует удаление Пользователя из хранилища
      * @param userId идентификатор Пользователя
      */
-    void deleteUser(Long userId);
+    void removeUser(long userId);
 }
