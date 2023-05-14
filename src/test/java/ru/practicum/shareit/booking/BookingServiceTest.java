@@ -163,7 +163,7 @@ public class BookingServiceTest extends Bookings {
         var savedBooking = bookingService.createBooking(user2.getId(), booking1Dto);
         //when
         var approvedBooking = bookingService
-                .approveBooking(user1.getId(), savedBooking.getId(), "true");
+                .approveBooking(user1.getId(), savedBooking.getId(), true);
         var findBooking = bookingService
                 .getBookingByIdForOwnerAndBooker(savedBooking.getId(), user2.getId());
         //then
@@ -179,25 +179,11 @@ public class BookingServiceTest extends Bookings {
         var savedBooking = bookingService.createBooking(user2.getId(), booking1Dto);
         //when
         var approvedBooking = bookingService
-                .approveBooking(user1.getId(), savedBooking.getId(), "FALSE");
+                .approveBooking(user1.getId(), savedBooking.getId(), false);
         var findBooking = bookingService
                 .getBookingByIdForOwnerAndBooker(savedBooking.getId(), user2.getId());
         //then
         assertThat(approvedBooking).usingRecursiveComparison().isEqualTo(findBooking);
-    }
-
-    @Test
-    public void approveBookingWithIncorrectParamApproved() {
-        //given
-        userRepository.save(user1);
-        userRepository.save(user2);
-        itemRepository.save(item1);
-        var savedBooking = bookingService.createBooking(user2.getId(), booking1Dto);
-        assertThatThrownBy(
-                //when
-                () -> bookingService.approveBooking(user1.getId(), savedBooking.getId(), "truee")
-                //then
-        ).isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
@@ -209,7 +195,7 @@ public class BookingServiceTest extends Bookings {
         bookingService.createBooking(user2.getId(), booking1Dto);
         assertThatThrownBy(
                 //when
-                () -> bookingService.approveBooking(user1.getId(), 99L, "true")
+                () -> bookingService.approveBooking(user1.getId(), 99L, true)
                 //then
         ).isInstanceOf(ResponseStatusException.class);
     }
@@ -221,10 +207,10 @@ public class BookingServiceTest extends Bookings {
         userRepository.save(user2);
         itemRepository.save(item1);
         var savedBooking = bookingService.createBooking(user2.getId(), booking1Dto);
-        bookingService.approveBooking(user1.getId(), savedBooking.getId(), "false");
+        bookingService.approveBooking(user1.getId(), savedBooking.getId(), false);
         assertThatThrownBy(
                 //when
-                () -> bookingService.approveBooking(user1.getId(), savedBooking.getId(), "true")
+                () -> bookingService.approveBooking(user1.getId(), savedBooking.getId(), true)
                 //then
         ).isInstanceOf(ResponseStatusException.class);
     }
@@ -238,7 +224,7 @@ public class BookingServiceTest extends Bookings {
         var savedBooking = bookingService.createBooking(user2.getId(), booking1Dto);
         assertThatThrownBy(
                 //when
-                () -> bookingService.approveBooking(user2.getId(), savedBooking.getId(), "true")
+                () -> bookingService.approveBooking(user2.getId(), savedBooking.getId(), true)
                 //then
         ).isInstanceOf(ResponseStatusException.class);
     }

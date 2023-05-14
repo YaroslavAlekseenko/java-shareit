@@ -23,7 +23,7 @@ public interface BookingService {
      * @param approved  статус бронирования
      * @return BookingDtoResponse
      */
-    BookingDtoResponse approveBooking(Long ownerId, Long bookingId, String approved);
+    BookingDtoResponse approveBooking(Long ownerId, Long bookingId, boolean approved);
 
     /**
      * Возвращает Бронирование по идентификатору

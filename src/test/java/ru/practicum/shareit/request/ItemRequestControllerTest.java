@@ -7,24 +7,27 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.request.controller.ItemRequestController;
 import ru.practicum.shareit.request.dto.*;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@WebMvcTest(ItemRequestController.class)
 @AutoConfigureMockMvc
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ItemRequestControllerTest {
@@ -122,7 +125,7 @@ public class ItemRequestControllerTest {
     @SneakyThrows
     public void getPrivateRequests() {
         //given
-        requestDtoResponseWithMD.setItems(Set.of(itemDataForRequestDto));
+        requestDtoResponseWithMD.setItems(List.of(itemDataForRequestDto));
         itemRequestListDto = ItemRequestListDto.builder()
                 .requests(List.of(requestDtoResponseWithMD))
                 .build();
@@ -192,7 +195,7 @@ public class ItemRequestControllerTest {
     @SneakyThrows
     public void getOtherRequests() {
         //given
-        requestDtoResponseWithMD.setItems(Set.of(itemDataForRequestDto));
+        requestDtoResponseWithMD.setItems(Collections.singletonList(itemDataForRequestDto));
         itemRequestListDto = ItemRequestListDto.builder()
                 .requests(List.of(requestDtoResponseWithMD))
                 .build();
@@ -265,7 +268,7 @@ public class ItemRequestControllerTest {
     @SneakyThrows
     public void getItemRequest() {
         //given
-        requestDtoResponseWithMD.setItems(Set.of(itemDataForRequestDto));
+        requestDtoResponseWithMD.setItems(Collections.singletonList(itemDataForRequestDto));
         //when
         when(itemRequestService.getItemRequest(anyLong(), anyLong())).thenReturn(requestDtoResponseWithMD);
         mvc.perform(

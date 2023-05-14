@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.service.UserService;
@@ -16,7 +17,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 
 
-@RestController
+@Controller
 @RequestMapping("/users")
 @Validated
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -53,8 +54,8 @@ public class UserController {
     }
 
     @DeleteMapping("{id}")
-    public void deleteUser(@Min(1) @PathVariable("id") Long userId) {
+    public ResponseEntity<Object> deleteUser(@Min(1) @PathVariable("id") Long userId) {
         userService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
     }
-
 }

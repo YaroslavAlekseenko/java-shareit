@@ -36,6 +36,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDtoResponse createBooking(Long bookerId, BookingDto bookingDto) {
+        bookingDto.setStatus(Status.WAITING);
         if (bookingDto.getEnd().isBefore(bookingDto.getStart()) ||
                 bookingDto.getEnd().equals(bookingDto.getStart())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -64,11 +65,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingDtoResponse approveBooking(Long ownerId, Long bookingId, String approved) {
-        String approve = approved.toLowerCase();
-        if (!(approve.equals("true") || approve.equals("false"))) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный параметр строки approved");
-        }
+    public BookingDtoResponse approveBooking(Long ownerId, Long bookingId, boolean approved) {
         Booking booking = bookings.findById(bookingId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         String.format("Бронирования с id=%s нет", bookingId)));
@@ -77,7 +74,7 @@ public class BookingServiceImpl implements BookingService {
                     "Невозможно изменить статус брони со статусом " + booking.getStatus());
         }
         if (booking.getItem().getOwner().getId().equals(ownerId)) {
-            if (approve.equals("true")) {
+            if (approved) {
                 booking.setStatus(Status.APPROVED);
             } else {
                 booking.setStatus(Status.REJECTED);

@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 @Builder
 @Getter
@@ -14,6 +14,6 @@ public class RequestDtoResponseWithMD {
     private Long id;
     private String description;
     private LocalDateTime created;
-    private Set<ItemDataForRequestDto> items;
+    private List<ItemDataForRequestDto> items;
 
 }

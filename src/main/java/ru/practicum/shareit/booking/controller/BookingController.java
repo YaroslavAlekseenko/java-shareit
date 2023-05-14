@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.service.BookingService;
@@ -16,7 +17,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-@RestController
+@Controller
 @RequestMapping("/bookings")
 @Validated
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -35,7 +36,7 @@ public class BookingController {
 
     @PatchMapping("{bookingId}")
     public ResponseEntity<BookingDtoResponse> approveBooking(@RequestHeader(userIdHeader) @Min(1) Long ownerId,
-                                                             @RequestParam String approved,
+                                                             @RequestParam boolean approved,
                                                              @PathVariable @Min(1) Long bookingId) {
         return ResponseEntity
                 .status(HttpStatus.OK)

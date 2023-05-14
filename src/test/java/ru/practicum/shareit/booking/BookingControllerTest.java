@@ -5,20 +5,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.shareit.booking.controller.BookingController;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.dto.BookingListDto;
@@ -31,7 +25,13 @@ import ru.practicum.shareit.user.dto.UserShortDto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@SpringBootTest
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@WebMvcTest(BookingController.class)
 @AutoConfigureMockMvc
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BookingControllerTest {
@@ -170,7 +170,7 @@ public class BookingControllerTest {
         //given
         bookingDtoResponse.setStatus(Status.APPROVED);
         //when
-        when(bookingService.approveBooking(anyLong(), anyLong(), anyString())).thenReturn(bookingDtoResponse);
+        when(bookingService.approveBooking(anyLong(), anyLong(), anyBoolean())).thenReturn(bookingDtoResponse);
         mvc.perform(
                         (patch("/bookings/1"))
                                 .header(userIdHeader, 1)
@@ -197,7 +197,7 @@ public class BookingControllerTest {
                 .andExpectAll(
                         status().isBadRequest()
                 );
-        verify(bookingService, times(0)).approveBooking(anyLong(), anyLong(), anyString());
+        verify(bookingService, times(0)).approveBooking(anyLong(), anyLong(), anyBoolean());
     }
 
     @Test
@@ -213,7 +213,7 @@ public class BookingControllerTest {
                 .andExpectAll(
                         status().isBadRequest()
                 );
-        verify(bookingService, times(0)).approveBooking(anyLong(), anyLong(), anyString());
+        verify(bookingService, times(0)).approveBooking(anyLong(), anyLong(), anyBoolean());
     }
 
     @Test
@@ -252,11 +252,26 @@ public class BookingControllerTest {
     public void getBookingByIdWithIncorrectUserIdForOwnerAndBooker() {
         //when
         mvc.perform(
-                        get("/bookings/1"))
+                        get("/bookings/1")
+                                .header(userIdHeader, 0))
                 .andDo(print())
                 //then
                 .andExpectAll(
                         status().isBadRequest()
+                );
+        verify(bookingService, times(0)).getBookingByIdForOwnerAndBooker(anyLong(), anyLong());
+    }
+
+    @Test
+    @SneakyThrows
+    public void getBookingByIdWithOutUserIdForOwnerAndBooker() {
+        //when
+        mvc.perform(
+                        get("/bookings/1"))
+                .andDo(print())
+                //then
+                .andExpectAll(
+                        status().isInternalServerError()
                 );
         verify(bookingService, times(0)).getBookingByIdForOwnerAndBooker(anyLong(), anyLong());
     }
