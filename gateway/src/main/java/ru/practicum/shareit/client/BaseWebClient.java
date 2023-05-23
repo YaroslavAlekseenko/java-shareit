@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class BaseWebClient {
-    protected WebClient webClient;
+    final WebClient webClient;
 
     public BaseWebClient(WebClient webClient) {
         this.webClient = webClient;
